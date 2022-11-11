@@ -15,3 +15,6 @@ The course will cover
 - Regularization and feature selection
 - Model evaluation
 - Neuronal nets, SVMs and their application
+
+### Lecture Content
+1. Introduction, Confusion Matrix & ROC Curve
