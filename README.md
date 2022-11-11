@@ -19,6 +19,8 @@ The course will cover
 ### Lecture Content
 1. Introduction, Confusion Matrix & ROC Curve
 2. Learning Problem, Types of Machine Learning & Perceptron Learning Algorithm
+3. Linear Regression, Gradient Descent & Stochastic Gradient Descent
 
 ### Assignment Content
 1. Perception Learning Algorithm
+2. Linear Regression
