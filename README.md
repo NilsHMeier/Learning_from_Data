@@ -21,17 +21,19 @@ The course will cover
 1. Introduction, Confusion Matrix & ROC Curve
 2. Learning Problem, Types of Machine Learning & Perceptron Learning Algorithm
 3. Linear Regression, Gradient Descent & Stochastic Gradient Descent
+4. Logistic Regression, Error Functions & Gaussian Discriminant Analysis
 
 ### Assignment Content
 
 1. Perceptron Learning Algorithm
 2. Linear Regression
+3. Logistic Regression
 
 ## Contributing to this Repository
 
-**General remark:** When commiting your changes, please make use of the [guidelines](https://gist.github.com/robertpainsi/b632364184e70900af4ab688decf6f53) on how to write commit messages!
+**General remark:** When committing your changes, please make use of the [guidelines](https://gist.github.com/robertpainsi/b632364184e70900af4ab688decf6f53) on how to write commit messages!
 
-If you want to add your solutions, remarks or anythins else to this repository, choose one of the following ways:
+If you want to add your solutions, remarks or anything else to this repository, choose one of the following ways:
 
 1. Create a fork of this repository, commit your changes and open a pull request to the master branch.
 2. Send me a message so that I can add you as a contributor to the repository. Then create a new branch from the master named *"dev/your_name"*, commit your changes and open a pull request to the master branch. **Please do not commit to the master branch directly!**
