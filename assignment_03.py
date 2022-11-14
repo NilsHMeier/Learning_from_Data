@@ -173,14 +173,20 @@ def gaussian_discriminant_analysis(data_points: np.ndarray, labels: np.ndarray) 
             Z_class1[j, i] = calculate_probability(np.array([x, y]), mean[1], covariance[1])
 
     # Plot the probabilities as a contour plot and the data points
-    fig, axs = plt.subplots()
-    axs.contour(X, Y, Z_class0, levels=10, colors='blue', label='Class 0')
-    axs.contour(X, Y, Z_class1, levels=10, colors='red', label='Class 1')
+    fig = plt.figure(figsize=(16, 8))
+    axs = [fig.add_subplot(121), fig.add_subplot(122, projection='3d')]
+    fig.suptitle('Gaussian Discriminant Analysis', fontsize=16)
+    axs[0].contour(X, Y, Z_class0, levels=10, colors='blue', label='Class 0')
+    axs[0].contour(X, Y, Z_class1, levels=10, colors='red', label='Class 1')
     for label in np.unique(labels):
-        axs.scatter(data_points[labels == label, 0], data_points[labels == label, 1], marker='o',
-                    label=f'Class {label}')
-    axs.legend()
-    axs.set(xlim=(x_values[0], x_values[-1]), ylim=(y_values[0], y_values[-1]), title='Gaussian Discriminant Analysis')
+        axs[0].scatter(data_points[labels == label, 0], data_points[labels == label, 1], marker='o',
+                       label=f'Class {label}')
+    axs[0].legend()
+    axs[0].set(xlim=(x_values[0], x_values[-1]), ylim=(y_values[0], y_values[-1]),
+               title='Contour plot of the probabilities', xlabel='x', ylabel='y')
+    axs[1].plot_surface(X, Y, np.maximum(Z_class0, Z_class1), cmap='coolwarm')
+    axs[1].set(xlabel='x', ylabel='y', title='Surface Plot of the probabilities')
+    plt.tight_layout()
     fig.savefig('Figures/assignment_03_gda.png')
     plt.show()
 
