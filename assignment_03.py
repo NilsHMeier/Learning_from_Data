@@ -93,8 +93,7 @@ def calculate_error(data_points: np.ndarray, labels: np.ndarray, weights: np.nda
     :param weights: A numpy array of the weights.
     :return: The error for the given weights.
     """
-    return 1 / len(data_points) * np.sum([np.log(1 + np.exp(-y * np.dot(x, weights)))
-                                          for x, y in zip(data_points, labels)])
+    return 1 / data_points.shape[1] * np.sum(np.log(1 + np.exp(-labels * np.matmul(data_points, weights))))
 
 
 def logistic_regression(data_points: np.ndarray, labels: np.ndarray, learning_rate: float,
@@ -123,10 +122,7 @@ def logistic_regression(data_points: np.ndarray, labels: np.ndarray, learning_ra
     prev_error = None
     for _ in range(max_iterations):
         # Calculate gradient
-        gradient = np.zeros(data_points.shape[1])
-        for x, y in zip(data_points, labels):
-            gradient += -y * x / (1 + np.exp(y * np.dot(x, weights)))
-        gradient /= len(data_points)
+        gradient = - 1/data_points.shape[1] * np.sum((-labels * data_points.T) / (1 + np.exp(labels * np.matmul(data_points, weights))), axis=1)
         # Normalize gradient
         gradient /= np.linalg.norm(gradient)
         # Update weights
