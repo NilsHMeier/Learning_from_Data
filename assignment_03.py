@@ -4,6 +4,7 @@ from scipy.spatial import ConvexHull
 from shapely.geometry import Polygon
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix
 from typing import Tuple, List, Union
 from tqdm import tqdm
 
@@ -34,6 +35,7 @@ def make_binary_clusters(n_points=100, blob_centers: List[Tuple[float, float]] =
         return make_binary_clusters(n_points, blob_centers, cluster_std + 0.1, linearly_separable)
 
     # Return the generated data
+    y = np.where(y == 0, -1, y)
     return x, y
 
 
@@ -96,7 +98,7 @@ def calculate_error(data_points: np.ndarray, labels: np.ndarray, weights: np.nda
 
 
 def logistic_regression(data_points: np.ndarray, labels: np.ndarray, learning_rate: float,
-                        max_iterations: int = 1000, stop_criteria: float = None) \
+                        max_iterations: int = 100, stop_criteria: float = None) \
         -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     This function performs logistic regression on the given data points. The function returns the final weights of the
@@ -211,6 +213,10 @@ def main():
     print(f'Train loss: {train_loss}')
     test_loss = calculate_error(X_test, y_test, weights)
     print(f'Test loss: {test_loss}')
+    # Plot confusion matrix for the test set
+    y_pred_prob = 1 / (1 + np.exp(-np.matmul(X_test, weights)))
+    y_pred_bin = np.where(y_pred_prob >= 0.5, 1, -1)
+    print(f'Confusion matrix:\n{confusion_matrix(y_test, y_pred_bin)}')
 
     # Experiment with different learning rates
     learning_rates = np.arange(0.01, 10, 0.01)
