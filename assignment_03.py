@@ -97,7 +97,7 @@ def calculate_error(data_points: np.ndarray, labels: np.ndarray, weights: np.nda
 
 
 def logistic_regression(data_points: np.ndarray, labels: np.ndarray, learning_rate: float,
-                        max_iterations: int = 100, stop_criteria: float = None) \
+                        max_iterations: int = 1000, stop_criteria: float = None) \
         -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     This function performs logistic regression on the given data points. The function returns the final weights of the
@@ -122,7 +122,8 @@ def logistic_regression(data_points: np.ndarray, labels: np.ndarray, learning_ra
     prev_error = None
     for _ in range(max_iterations):
         # Calculate gradient
-        gradient = - 1/data_points.shape[1] * np.sum((-labels * data_points.T) / (1 + np.exp(labels * np.matmul(data_points, weights))), axis=1)
+        gradient = - 1/data_points.shape[1] * \
+                   np.sum((labels * data_points.T) / (1 + np.exp(labels * np.matmul(data_points, weights))), axis=1)
         # Normalize gradient
         gradient /= np.linalg.norm(gradient)
         # Update weights
@@ -153,7 +154,7 @@ def gaussian_discriminant_analysis(data_points: np.ndarray, labels: np.ndarray) 
 
     :param data_points: A numpy array of the data points.
     :param labels: A numpy array of the labels.
-    :return: A tuple of (mean, covariance) where every entry is a numpy array.
+    :return: None.
     """
     # Calculate mean and covariance matrix of data points
     mean = np.array([np.mean(data_points[labels == label], axis=0) for label in np.unique(labels)])
@@ -198,7 +199,7 @@ def main():
     X_train, X_test, y_train, y_test = train_test_split(data_points, labels, test_size=0.3, random_state=42)
 
     # Perform logistic regression
-    weights, errors, weights_per_step = logistic_regression(data_points=X_train, labels=y_train, learning_rate=1.0,
+    weights, errors, weights_per_step = logistic_regression(data_points=X_train, labels=y_train, learning_rate=0.1,
                                                             max_iterations=1000, stop_criteria=0.001)
     print(f'Final weights: {weights}')
     print(f'Final error: {errors[-1]}')
@@ -215,10 +216,10 @@ def main():
     print(f'Confusion matrix:\n{confusion_matrix(y_test, y_pred_bin)}')
 
     # Experiment with different learning rates
-    learning_rates = np.arange(0.01, 10, 0.01)
+    learning_rates = np.arange(0.01, 1.01, 0.01)
     errors = []
     for lr in tqdm(learning_rates):
-        weights, _, _ = logistic_regression(data_points=X_train, labels=y_train, learning_rate=lr, stop_criteria=0.001)
+        weights, _, _ = logistic_regression(data_points=X_train, labels=y_train, learning_rate=lr, stop_criteria=0.1)
         errors.append(calculate_error(X_test, y_test, weights))
 
     # Plot the loss for different learning rates
