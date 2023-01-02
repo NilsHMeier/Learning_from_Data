@@ -22,12 +22,31 @@ The course will cover
 2. Learning Problem, Types of Machine Learning & Perceptron Learning Algorithm
 3. Linear Regression, Gradient Descent & Stochastic Gradient Descent
 4. Logistic Regression, Error Functions & Gaussian Discriminant Analysis
+5. Decision Trees, Entropy Measurement & Gain Ratio
+6. Learnability, Concept Learning & Hoeffding's Inequality
+7. Generalization Theory, Breakpoints of Hypothesis Sets & VC Dimension
+8. Bias and Variance, Model Complexity & Choice of Hypothesis Set
+9. Support-Vector-Machines, Lagrange Formulation & Quadratic Programming
+10. Neural Networks, Impact of Layers & Backpropagation
 
 ### Assignment Content
 
 1. Perceptron Learning Algorithm
 2. Linear Regression
 3. Logistic Regression
+4. Decision Trees
+5. Hoeffding's Inequality
+6. VC Dimension & Growth Functions
+7. Bias-Variance-Tradeoff
+8. Lagrange-Formulation & SVM
+
+#### Remark on Assignment 8
+
+Within the implementation of the Support-Vector-Machine in assignment_08.py the *cvxopt* package is used to solve the 
+Lagrange formulation in order to receive the alphas. Since the standard solver does not always yield the correct 
+solution based on the input features, the Mosek solver is used instead (the *mosek* package is included in the 
+requirements file). However, a licence is required to make use of the Mosek solver. To get your own licence file, please 
+request an academic-licence on the [Mosek-Page](https://www.mosek.com/products/academic-licenses/).
 
 ## Contributing to this Repository
 
