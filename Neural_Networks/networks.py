@@ -1,14 +1,31 @@
 from typing import List, Tuple
 import numpy as np
-from Neural_Networks import activations, losses
+from . import activations, losses
 from .util import cast_inputs
 
 
 class DenseNetwork:
+    """
+    This class implements the basic functionalities of a dense neural network. The class can be used to create networks
+    with known weights and biases, or it can be used to create a new network and train it. The class also implements the
+    ability to predict the output of the network given the input features.
+    The training of the network is done using the backpropagation algorithm and gradient descent.
+    """
 
     def __init__(self, input_features: int, layers: List[int], activation: str, loss: str,
                  weights: List[np.ndarray] = None, biases: List[np.ndarray] = None,
                  learning_rate: float = 1.0):
+        """
+        Initialize the network. If weights and biases are not provided, they will be initialized randomly.
+
+        :param input_features: The number of input features.
+        :param layers: The number of units in each layer.
+        :param activation: The activation function to use.
+        :param loss: The loss function to use.
+        :param weights: The optional weights of the network as a list of numpy arrays.
+        :param biases: The optional biases of the network as a list of numpy arrays.
+        :param learning_rate: The learning rate of the network.
+        """
         # Check inputs
         assert input_features > 0, 'Input features must be greater than 0.'
         assert len(layers) > 0, 'There must be at least one layer.'
