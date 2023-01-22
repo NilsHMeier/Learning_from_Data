@@ -29,6 +29,7 @@ The course will cover
 9. Support-Vector-Machines, Lagrange Formulation & Quadratic Programming
 10. Neural Networks, Impact of Layers & Backpropagation
 11. Feature Space, Transformations & Radial-Basis Functions
+12. Overfitting, Regularization & Cross-Validation
 
 ### Assignment Content
 
@@ -41,7 +42,8 @@ The course will cover
 7. Bias-Variance-Tradeoff
 8. Lagrange-Formulation & SVM
 9. MLPs & Backpropagation
-10. Non-Linear Transformations
+10. Non-Linear Transformations & RBFs
+11. Regularization & Overfitting
 
 #### Remark on Assignment 8
 
