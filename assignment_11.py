@@ -1,69 +1,15 @@
 import itertools
 import time
+import multiprocessing as mp
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-from sklearn.metrics import mean_squared_error
 from tqdm import tqdm
+from Models import RidgeRegression, run_experiment_for_settings
 
-
-def determine_weights_ridge(x_values: np.ndarray, y_values: np.ndarray, gamma: float, delta: float) -> np.ndarray:
-    """
-    Determine the weights for the given x and y values using the kernel trick. The weights are calculated using the
-    pseudo inverse of the kernel matrix. The kernel matrix is calculated using the RBF kernel.
-
-    :param x_values: x values as a numpy array.
-    :param y_values: y values as a numpy array.
-    :param gamma: Gamma value for the RBF kernel.
-    :param delta: Lambda value for the ridge regression.
-    :return: Weights as a numpy array.
-    """
-    # Build Phi matrix
-    meshgrid = np.meshgrid(x_values, x_values)
-    phi = np.exp(-gamma * (meshgrid[1] - meshgrid[0]) ** 2)
-
-    # Calculate the weights
-    inverse = np.linalg.inv(np.dot(phi.T, phi) + (delta ** 2 * np.eye(len(phi))))
-    w = np.dot(np.dot(inverse, phi.T), y_values)
-    return w
-
-
-def run_experiment_for_settings(n_points: int, n_experiments: int, lower: float, upper: float, gamma: float,
-                                delta: float) -> float:
-    """
-    Run multiple experiments for the given settings and return the average MSE.
-
-    :param n_points: Number of points to sample.
-    :param n_experiments: Number of experiments to run.
-    :param lower: Lower bound of the x values.
-    :param upper: Upper bound of the x values.
-    :param gamma: Gamma value for the RBF kernel.
-    :param delta: Lambda value for the ridge regression.
-    :return: Mean of the MSE values.
-    """
-    # Run the experiment multiple times
-    mse = []
-    successful_runs = 0
-    while successful_runs < n_experiments:
-        try:
-            # Sample x values and calculate the respective y with noise
-            x_values = np.random.uniform(low=lower, high=upper, size=n_points)
-            y_values = x_values ** 2 + np.random.normal(loc=0, scale=0.1, size=n_points)
-
-            # Calculate the weights
-            w = determine_weights_ridge(x_values=x_values, y_values=y_values, gamma=gamma, delta=delta)
-
-            # Make prediction for every x values between -1 and 1
-            x_ticks = np.linspace(lower, upper, 200)
-            y_pred = np.array([np.sum(w * np.exp(-gamma * (x_values - new_x) ** 2)) for new_x in x_ticks])
-
-            # Calculate the mean squared error
-            mse.append(mean_squared_error(y_true=x_ticks ** 2, y_pred=y_pred))
-            successful_runs += 1
-        except np.linalg.LinAlgError:
-            pass
-
-    return np.mean(mse)
+# Set up parameters
+USE_THREADING = True
+N_THREADS = 4
 
 
 def delta_experiments(n_points: int = 20, lower: int = -1, upper: int = 1, gamma: float = 1.0):
@@ -88,11 +34,11 @@ def delta_experiments(n_points: int = 20, lower: int = -1, upper: int = 1, gamma
 
     # Use different values for delta to fit the data
     for d, ax in zip([0, 0.01, 0.1, 1, 10, 100], axs):
-        # Get the weights
-        w = determine_weights_ridge(x_values=x_values, y_values=y_values, gamma=gamma, delta=d)
+        # Fit a model
+        model = RidgeRegression(gamma=gamma, delta=d).fit(features=x_values, labels=y_values)
 
-        # Make prediction for every x values between -1 and 1
-        y_pred = np.array([np.sum(w * np.exp(-gamma * (x_values - new_x) ** 2)) for new_x in x_ticks])
+        # Make prediction for every x value
+        y_pred = model.predict(x_ticks)
 
         # Plot the predictions
         ax.scatter(x_values, y_values, label='Data Points')
@@ -120,10 +66,9 @@ def combined_experiments(n_points: int = 20, n_experiments: int = 100, lower: in
     # Set up the different values for delta and gamma
     delta_values = [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5, 10]
     gamma_values = [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5, 10]
-    experiment_settings = list(itertools.product(delta_values, gamma_values))
-
-    # Create a matrix to store the results
-    results = np.zeros((len(delta_values), len(gamma_values)))
+    experiment_settings = [{'delta': delta, 'gamma': gamma, 'n_points': n_points, 'n_experiments': n_experiments,
+                            'lower': lower, 'upper': upper}
+                           for delta, gamma in itertools.product(delta_values, gamma_values)]
 
     # Measure the time
     start = time.time()
@@ -131,11 +76,22 @@ def combined_experiments(n_points: int = 20, n_experiments: int = 100, lower: in
     # Run the experiments
     print('Running experiments...')
     np.random.seed(0)
-    for delta, gamma in tqdm(experiment_settings):
-        # Store the mean of the mean squared errors
-        i, j = delta_values.index(delta), gamma_values.index(gamma)
-        results[i, j] = run_experiment_for_settings(n_points=n_points, n_experiments=n_experiments, lower=lower,
-                                                    upper=upper, gamma=gamma, delta=delta)
+
+    # Run the experiments in parallel or sequentially
+    if USE_THREADING:
+        with mp.Pool(processes=N_THREADS) as pool:
+            results = pool.map(run_experiment_for_settings, experiment_settings)
+
+        results = np.array(results).reshape(len(delta_values), len(gamma_values))
+    else:
+        # Create a matrix to store the results
+        results = np.zeros((len(delta_values), len(gamma_values)))
+
+        # Run the experiments
+        for settings in tqdm(experiment_settings):
+            # Store the mean of the mean squared errors
+            i, j = delta_values.index(settings['delta']), gamma_values.index(settings['gamma'])
+            results[i, j] = run_experiment_for_settings(settings=settings)
 
     # Measure the time
     end = time.time()
