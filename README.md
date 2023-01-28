@@ -30,6 +30,8 @@ The course will cover
 10. Neural Networks, Impact of Layers & Backpropagation
 11. Feature Space, Transformations & Radial-Basis Functions
 12. Overfitting, Regularization & Cross-Validation
+13. Bagging, Boosting & Random Forests
+14. Clustering, K-Means & Expectation-Maximization
 
 ### Assignment Content
 
