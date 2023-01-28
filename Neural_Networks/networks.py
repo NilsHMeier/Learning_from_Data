@@ -16,7 +16,7 @@ class DenseNetwork:
 
     def __init__(self, input_features: int, layers: List[int], activation: str, loss: str,
                  weights: List[np.ndarray] = None, biases: List[np.ndarray] = None,
-                 learning_rate: float = 1.0):
+                 learning_rate: float = 1.0, init_constant: float = None):
         """
         Initialize the network. If weights and biases are not provided, they will be initialized randomly.
 
@@ -27,6 +27,7 @@ class DenseNetwork:
         :param weights: The optional weights of the network as a list of numpy arrays.
         :param biases: The optional biases of the network as a list of numpy arrays.
         :param learning_rate: The learning rate of the network.
+        :param init_constant: The constant to use for initializing the weights and biases.
         """
         # Check inputs
         assert input_features > 0, 'Input features must be greater than 0.'
@@ -40,8 +41,8 @@ class DenseNetwork:
         self.__act = activations.get_activation_function(activation)
         self.__act_derivative = activations.get_activation_derivative(activation)
         self.__loss, self.__loss_derivative = losses.get_loss_function(loss)
-        self.__weights = weights if weights is not None else self.__initialize_weights()
-        self.__biases = biases if biases is not None else self.__initialize_biases()
+        self.__weights = weights if weights is not None else self.__initialize_weights(init_constant)
+        self.__biases = biases if biases is not None else self.__initialize_biases(init_constant)
 
     @property
     def weights(self):
@@ -57,29 +58,40 @@ class DenseNetwork:
         """
         return self.__biases
 
-    def __initialize_weights(self):
+    def __initialize_weights(self, init_constant: float = None):
         """
         Initialize the weights of the network using the standard normal distribution.
 
+        :param init_constant: The constant to use for initializing the weights.
         :return: None.
         """
         weights = []
         for i in range(len(self.__layers)):
             if i == 0:
-                weights.append(np.random.randn(self.__layers[i], self.__input_features))
+                if init_constant is None:
+                    weights.append(np.random.randn(self.__layers[i], self.__input_features))
+                else:
+                    weights.append(np.full(shape=(self.__layers[i], self.__input_features), fill_value=init_constant))
             else:
-                weights.append(np.random.randn(self.__layers[i], self.__layers[i - 1]))
+                if init_constant is None:
+                    weights.append(np.random.randn(self.__layers[i], self.__layers[i - 1]))
+                else:
+                    weights.append(np.full(shape=(self.__layers[i], self.__layers[i - 1]), fill_value=init_constant))
         return weights
 
-    def __initialize_biases(self):
+    def __initialize_biases(self, init_constant: float = None):
         """
         Initialize the biases of the network using the standard normal distribution.
 
+        :param init_constant: The constant to use for initializing the biases.
         :return: None.
         """
         biases = []
         for i in range(len(self.__layers)):
-            biases.append(np.random.randn(self.__layers[i]))
+            if init_constant is None:
+                biases.append(np.random.randn(self.__layers[i]))
+            else:
+                biases.append(np.full(shape=self.__layers[i], fill_value=init_constant))
         return biases
 
     def __repr__(self):
@@ -126,8 +138,10 @@ class DenseNetwork:
         nx.draw_networkx_labels(G, pos, font_size=10, font_color='black', verticalalignment='bottom',
                                 horizontalalignment='center', ax=ax)
         nx.draw_networkx_edge_labels(G, pos, label_pos=0.65, font_size=8, font_color='black', ax=ax)
-        plt.tight_layout()
-        plt.show()
+
+        if ax is None:
+            plt.tight_layout()
+            plt.show()
 
         return None
 
