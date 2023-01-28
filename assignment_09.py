@@ -2,6 +2,7 @@ from Neural_Networks import DenseNetwork
 import numpy as np
 from sklearn.datasets import make_classification
 import matplotlib.pyplot as plt
+from typing import List
 
 
 def task_1():
@@ -55,18 +56,21 @@ def train_networks():
     print(f'Loss: {and_network.evaluate(features, labels)}')
 
 
-def task_4(constant: float = None, title: str = None):
+def task_4(constant: float = None, layers: List[int] = None, title: str = None):
     print(f'Initialize the weights with a constant of {constant}')
+
+    if layers is None:
+        layers = [1]
 
     # Create a binary classification dataset
     features, labels = make_classification(n_samples=100, n_features=5, n_redundant=0, n_informative=2,
                                            n_clusters_per_class=1, random_state=1)
 
     # Create a plot to visualize the network before and after training
-    fig, axs = plt.subplots(ncols=2, figsize=(16, 6), tight_layout=True)
+    fig, axs = plt.subplots(ncols=2, figsize=(16, 12), tight_layout=True)
 
     # Create a network
-    network = DenseNetwork(input_features=features.shape[1], layers=[1], activation='sigmoid', loss='mse',
+    network = DenseNetwork(input_features=features.shape[1], layers=layers, activation='sigmoid', loss='mse',
                            learning_rate=0.05, init_constant=constant)
 
     # Plot and evaluate the network before training
@@ -83,7 +87,7 @@ def task_4(constant: float = None, title: str = None):
     axs[1].set_title(f'After Training: Loss = {loss:.2f}')
 
     # Show the plot
-    fig.suptitle(f'Constant: {constant}', fontsize=16)
+    fig.suptitle(f'Constant: {constant} - Layers: {layers}', fontsize=16)
     fig.show()
 
     # Save the plot if a title is given
@@ -98,8 +102,10 @@ def main():
     print('\n')
     train_networks()
     print('\n')
-    task_4(constant=0.0, title='Init_0')
-    task_4(constant=1.0, title='Init_1')
+    task_4(constant=0.0, layers=[1], title='Single_0')
+    task_4(constant=0.0, layers=[5, 1], title='Double_0')
+    task_4(constant=1.0, layers=[1], title='Single_1')
+    task_4(constant=1.0, layers=[5, 1], title='Double_1')
 
 
 if __name__ == '__main__':
