@@ -2,6 +2,8 @@ from typing import List, Tuple
 import numpy as np
 from . import activations, losses
 from .util import cast_inputs
+import matplotlib.pyplot as plt
+import networkx as nx
 
 
 class DenseNetwork:
@@ -86,6 +88,48 @@ class DenseNetwork:
         """
         return f'DenseNetwork(input_features={self.__input_features}, layers={self.__layers}, ' \
                f'activation={self.__act.__name__})'
+
+    def plot_network(self, ax: plt.Axes = None) -> None:
+        """
+        Plot the network.
+
+        :param ax: The axis to plot on. If None, a new figure will be created.
+        :return: None.
+        """
+        # Create the graph and a dictionary for positions
+        G = nx.Graph()
+        pos = {}
+
+        # Add the input features
+        for i in range(self.__input_features):
+            G.add_node(f'Input_{i}', label=f'Input Feature {i}')
+            pos[f'Input_{i}'] = np.array([0, i - np.mean(range(self.__input_features))])
+
+        # Loop over the remaining layers
+        for l in range(len(self.__layers)):
+            for i in range(self.__layers[l]):
+                G.add_node(f'Node_{l}_{i}', label=f'Layer {l + 1}, Unit {i + 1}')
+                pos[f'Node_{l}_{i}'] = np.array([0.5 * (l + 1), i - np.mean(range(self.__layers[l]))])
+                if l == 0:
+                    for j in range(self.__input_features):
+                        G.add_edge(f'Input_{j}', f'Node_{l}_{i}', weight=round(self.weights[l][i][j], 2))
+                else:
+                    for j in range(self.__layers[l - 1]):
+                        G.add_edge(f'Node_{l - 1}_{j}', f'Node_{l}_{i}', weight=round(self.weights[l][i][j], 2))
+
+        # Plot the graph
+        if ax is None:
+            fig, ax = plt.subplots()
+
+        nx.draw_networkx_nodes(G, pos, node_size=1000, node_color='lightblue', ax=ax)
+        nx.draw_networkx_edges(G, pos, width=2, edge_color='black', ax=ax)
+        nx.draw_networkx_labels(G, pos, font_size=10, font_color='black', verticalalignment='bottom',
+                                horizontalalignment='center', ax=ax)
+        nx.draw_networkx_edge_labels(G, pos, label_pos=0.65, font_size=8, font_color='black', ax=ax)
+        plt.tight_layout()
+        plt.show()
+
+        return None
 
     def predict(self, features: np.ndarray) -> np.ndarray:
         """
