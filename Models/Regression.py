@@ -1,7 +1,8 @@
-from typing import Dict, Union
+from typing import Dict, Union, Callable
 import numpy as np
 from sklearn.metrics import mean_squared_error
 from .Model import BaseModel
+from .Transformation import transform_to_polynomial
 from sklearn import metrics
 
 LOSS_MAPPING = {'mse': metrics.mean_squared_error, 'mae': metrics.mean_absolute_error}
@@ -79,6 +80,88 @@ class RidgeRegression(BaseModel):
 
         # Calculate the loss
         y_pred = self.predict(features).squeeze()
+        return self.loss(y_true=labels, y_pred=y_pred)
+
+
+class Regression(BaseModel):
+    """
+    This class implements the linear regression model. The weights are calculated using the pseudo inverse of the
+    feature matrix. The loss function can be either mean squared error (MSE) or mean absolute error (MAE).
+    """
+
+    def __init__(self, loss: str = 'mse', feature_transform: Union[Callable, int] = None):
+        """
+        Initialize the model.
+
+        :param loss: Loss function to use. Either 'mse' or 'mae'.
+        :param feature_transform: Function to transform the features to z space.
+        """
+        # Check the input parameters
+        assert isinstance(loss, str), 'Loss must be a string.'
+
+        # Initialize the parameters
+        self.loss = LOSS_MAPPING[loss]
+        self.weights: np.ndarray = np.zeros(0)
+        if isinstance(feature_transform, int):
+            self.feature_transform = lambda x: transform_to_polynomial(x, feature_transform)
+        else:
+            self.feature_transform = feature_transform
+
+    def fit(self, features: np.ndarray, labels: np.ndarray) -> 'Regression':
+        """
+        Fit the model to the given data. The weights are calculated using the pseudo inverse of the feature matrix.
+
+        :param features: Features as a numpy array.
+        :param labels: Labels as a numpy array.
+        :return: Self.
+        """
+        # Transform the features if necessary
+        if self.feature_transform is not None:
+            features = self.feature_transform(features)
+        if features.ndim == 1:
+            features = np.expand_dims(features, axis=1)
+
+        # Determine the weights using the pseudo inverse
+        self.weights = np.dot(np.linalg.pinv(features), labels)
+        self.is_fitted = True
+
+        # Return the fitted model
+        return self
+
+    def predict(self, features: np.ndarray):
+        """
+        Predict the targets for the given features.
+
+        :param features: Features as a numpy array.
+        :return: Predicted targets as a numpy array.
+        :raises ValueError: If the model has not been fitted yet.
+        """
+        if not self.is_fitted:
+            raise ValueError("The model has not been fitted yet.")
+
+        # Transform the features if necessary
+        if self.feature_transform is not None:
+            features = self.feature_transform(features)
+        if features.ndim == 1:
+            features = np.expand_dims(features, axis=1)
+
+        # Make prediction for every x value using vectorization
+        y_pred = np.dot(features, self.weights)
+        return y_pred.squeeze()
+
+    def evaluate(self, features: np.ndarray, labels: np.ndarray) -> float:
+        """
+        Evaluate the model on the given data.
+
+        :param features: Features as a numpy array.
+        :param labels: Labels as a numpy array.
+        :return: The loss values.
+        """
+        if not self.is_fitted:
+            raise ValueError("The model has not been fitted yet.")
+
+        # Calculate the loss
+        y_pred = self.predict(features)
         return self.loss(y_true=labels, y_pred=y_pred)
 
 
