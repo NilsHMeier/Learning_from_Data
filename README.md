@@ -33,6 +33,14 @@ The course will cover
 13. Bagging, Boosting & Random Forests
 14. Clustering, K-Means & Expectation-Maximization
 
+#### Remark on Lecture 12
+
+Within the file *lecture_12_overfitting.py* some experiments from the slides are replicated, namely the overfitting
+depending on the noise level, the target complexity and the number of data points is studied. The code provides the
+option to use multiprocessing in order to speed up the calculations. If you want to use the multithreading version,
+please choose a proper number of threads - otherwise your computer might be running out of capacity. If you want to use
+the single-threaded version, please set the variable *USE_MULTIPROCESSING* to *False*.
+
 ### Assignment Content
 
 1. Perceptron Learning Algorithm
